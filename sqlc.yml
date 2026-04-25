@@ -1,0 +1,36 @@
+version: "2"
+overrides:
+  go:
+    overrides:
+      - db_type: "pg_catalog.timestamptz"
+        nullable: true
+        engine: postgresql
+        go_type:
+          import: "database/sql"
+          type: "NullTime"
+      - db_type: "pg_catalog.timestamptz"
+        nullable: false
+        engine: "postgresql"
+        go_type:
+          import: "time"
+          type: "Time"
+      - db_type: "uuid"
+        go_type: "github.com/google/uuid.UUID"
+      - db_type: "uuid"
+        nullable: true
+        go_type: "github.com/google/uuid.NullUUID"
+      - db_type: "text"
+        nullable: true
+        go_type:
+          import: "database/sql"
+          type: "NullString"
+sql:
+  - engine: postgresql
+    name: "user_service"
+    queries: "sql/users/query.sql"
+    schema: "sql/users/migrations"
+    gen:
+      go:
+        package: user_data
+        out: internal/user/data
+        sql_package: database/sql
