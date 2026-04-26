@@ -12,9 +12,10 @@ public class IdentityContext<TKey>(DbContextOptions<IdentityContext<TKey>> optio
 {
     public virtual DbSet<User<TKey>> Users { get; set; }
 
-    private void ConfigureBase<T>(EntityTypeBuilder<T> builder) where T : BaseEntity<TKey>
+    private static void ConfigureBase<T>(EntityTypeBuilder<T> builder) where T : BaseEntity<TKey>
     {
         builder.HasKey(i => i.Id);
+        builder.Property(i => i.Id).HasDefaultValueSql("gen_random_uuid()").ValueGeneratedOnAdd();
         builder.Property(i => i.CreatedAt).HasDefaultValueSql("now()").ValueGeneratedOnAdd();
         builder.Property(i => i.UpdatedAt).HasDefaultValueSql("now()").ValueGeneratedOnAddOrUpdate();
     }
