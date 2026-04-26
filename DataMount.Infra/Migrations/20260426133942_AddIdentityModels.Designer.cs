@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DataMount.Infra.Migrations
 {
     [DbContext(typeof(IdentityContext<Guid>))]
-    [Migration("20260426124245_AddBaseIdentityTables")]
-    partial class AddBaseIdentityTables
+    [Migration("20260426133942_AddIdentityModels")]
+    partial class AddIdentityModels
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -30,7 +30,8 @@ namespace DataMount.Infra.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
-                        .HasColumnName("id");
+                        .HasColumnName("id")
+                        .HasDefaultValueSql("gen_random_uuid()");
 
                     b.Property<string>("BlockReason")
                         .HasColumnType("text")
@@ -60,16 +61,27 @@ namespace DataMount.Infra.Migrations
                         .HasColumnName("updated_at")
                         .HasDefaultValueSql("now()");
 
-                    b.HasKey("Id");
+                    b.Property<string>("account_type")
+                        .IsRequired()
+                        .HasMaxLength(13)
+                        .HasColumnType("character varying(13)")
+                        .HasColumnName("account_type");
 
-                    b.HasIndex("OwnerId");
+                    b.HasKey("Id")
+                        .HasName("pk_accounts");
+
+                    b.HasIndex("OwnerId")
+                        .HasDatabaseName("ix_accounts_owner_id");
 
                     b.HasIndex("IdentifierContactId", "OwnerId")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("ix_accounts_identifier_contact_id_owner_id");
 
-                    b.ToTable((string)null);
+                    b.ToTable("accounts", (string)null);
 
-                    b.UseTpcMappingStrategy();
+                    b.HasDiscriminator<string>("account_type").HasValue("Account<Guid>");
+
+                    b.UseTphMappingStrategy();
                 });
 
             modelBuilder.Entity("DataMount.Domain.Models.Identity.Contact<System.Guid>", b =>
@@ -77,7 +89,8 @@ namespace DataMount.Infra.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
-                        .HasColumnName("id");
+                        .HasColumnName("id")
+                        .HasDefaultValueSql("gen_random_uuid()");
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
@@ -112,12 +125,104 @@ namespace DataMount.Infra.Migrations
                     b.ToTable("contacts", (string)null);
                 });
 
+            modelBuilder.Entity("DataMount.Domain.Models.Identity.LoginAttempt<System.Guid>", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<Guid>("AccountId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("account_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<DateTime?>("FailedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("failed_at");
+
+                    b.Property<string>("FailureReason")
+                        .HasColumnType("text")
+                        .HasColumnName("failure_reason");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.HasKey("Id")
+                        .HasName("pk_login_attempts");
+
+                    b.HasIndex("AccountId")
+                        .HasDatabaseName("ix_login_attempts_account_id");
+
+                    b.ToTable("login_attempts", (string)null);
+                });
+
+            modelBuilder.Entity("DataMount.Domain.Models.Identity.Session<System.Guid>", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<Guid>("AccountId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("account_id");
+
+                    b.Property<Guid>("AttemptId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("attempt_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<string>("Ip")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("ip");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<string>("UserAgent")
+                        .HasColumnType("text")
+                        .HasColumnName("user_agent");
+
+                    b.HasKey("Id")
+                        .HasName("pk_sessions");
+
+                    b.HasIndex("AccountId")
+                        .HasDatabaseName("ix_sessions_account_id");
+
+                    b.HasIndex("AttemptId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_sessions_attempt_id");
+
+                    b.ToTable("sessions", (string)null);
+                });
+
             modelBuilder.Entity("DataMount.Domain.Models.Identity.User<System.Guid>", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
-                        .HasColumnName("id");
+                        .HasColumnName("id")
+                        .HasDefaultValueSql("gen_random_uuid()");
 
                     b.Property<string>("BanReason")
                         .HasColumnType("text")
@@ -168,7 +273,9 @@ namespace DataMount.Infra.Migrations
                         .HasColumnType("character varying(500)")
                         .HasColumnName("password_hash");
 
-                    b.ToTable("credential_accounts", (string)null);
+                    b.ToTable("accounts", (string)null);
+
+                    b.HasDiscriminator().HasValue("credential");
                 });
 
             modelBuilder.Entity("DataMount.Domain.Models.Identity.OAuthAccount<System.Guid>", b =>
@@ -188,7 +295,9 @@ namespace DataMount.Infra.Migrations
                         .HasColumnType("text")
                         .HasColumnName("refresh_token");
 
-                    b.ToTable("oauth_accounts", (string)null);
+                    b.ToTable("accounts", (string)null);
+
+                    b.HasDiscriminator().HasValue("oauth");
                 });
 
             modelBuilder.Entity("DataMount.Domain.Models.Identity.Account<System.Guid>", b =>
@@ -197,13 +306,15 @@ namespace DataMount.Infra.Migrations
                         .WithMany()
                         .HasForeignKey("IdentifierContactId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_accounts_contact_guid_identifier_contact_id");
 
                     b.HasOne("DataMount.Domain.Models.Identity.User<System.Guid>", "Owner")
                         .WithMany("Accounts")
                         .HasForeignKey("OwnerId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_accounts_users_owner_id");
 
                     b.Navigation("IdentifierContact");
 
@@ -220,6 +331,38 @@ namespace DataMount.Infra.Migrations
                         .HasConstraintName("fk_contacts_users_owner_id");
 
                     b.Navigation("Owner");
+                });
+
+            modelBuilder.Entity("DataMount.Domain.Models.Identity.LoginAttempt<System.Guid>", b =>
+                {
+                    b.HasOne("DataMount.Domain.Models.Identity.Account<System.Guid>", "Account")
+                        .WithMany()
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_login_attempts_accounts_account_id");
+
+                    b.Navigation("Account");
+                });
+
+            modelBuilder.Entity("DataMount.Domain.Models.Identity.Session<System.Guid>", b =>
+                {
+                    b.HasOne("DataMount.Domain.Models.Identity.Account<System.Guid>", "Account")
+                        .WithMany()
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_sessions_accounts_account_id");
+
+                    b.HasOne("DataMount.Domain.Models.Identity.LoginAttempt<System.Guid>", "Attempt")
+                        .WithOne()
+                        .HasForeignKey("DataMount.Domain.Models.Identity.Session<System.Guid>", "AttemptId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasConstraintName("fk_sessions_login_attempts_attempt_id");
+
+                    b.Navigation("Account");
+
+                    b.Navigation("Attempt");
                 });
 
             modelBuilder.Entity("DataMount.Domain.Models.Identity.User<System.Guid>", b =>

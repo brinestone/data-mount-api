@@ -6,4 +6,5 @@ public class LoginAttempt<TKey> : BaseEntity<TKey> where TKey : struct, IEquatab
     public DateTime? FailedAt { get; set; }
     public bool IsSuccess => FailedAt.HasValue;
     public string? FailureReason { get; set; }
+    public virtual Account<TKey>? Account { get; set; }
 }
