@@ -113,6 +113,10 @@ namespace DataMount.Infra.Migrations
                         .HasColumnType("text")
                         .HasColumnName("value");
 
+                    b.Property<DateTime?>("VerifiedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("verified_at");
+
                     b.HasKey("Id")
                         .HasName("pk_contacts");
 
@@ -270,8 +274,6 @@ namespace DataMount.Infra.Migrations
                         .HasColumnType("character varying(500)")
                         .HasColumnName("password_hash");
 
-                    b.ToTable("accounts", (string)null);
-
                     b.HasDiscriminator().HasValue("credential");
                 });
 
@@ -304,7 +306,7 @@ namespace DataMount.Infra.Migrations
                         .HasForeignKey("IdentifierContactId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_accounts_contact_guid_identifier_contact_id");
+                        .HasConstraintName("fk_accounts_contacts_identifier_contact_id");
 
                     b.HasOne("DataMount.Domain.Models.Identity.User<System.Guid>", "Owner")
                         .WithMany("Accounts")

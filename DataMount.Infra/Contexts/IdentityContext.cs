@@ -11,6 +11,8 @@ public class IdentityContext<TKey>(DbContextOptions<IdentityContext<TKey>> optio
     : DbContext(options) where TKey : struct, IEquatable<TKey>
 {
     public virtual DbSet<User<TKey>> Users { get; set; }
+    public virtual DbSet<Contact<TKey>> Contacts { get; set; }
+    public virtual DbSet<CredentialAccount<TKey>> CredentialAccounts { get; set; }
 
     private static void ConfigureBase<T>(EntityTypeBuilder<T> builder) where T : BaseEntity<TKey>
     {
@@ -23,14 +25,6 @@ public class IdentityContext<TKey>(DbContextOptions<IdentityContext<TKey>> optio
     protected override void OnModelCreating(ModelBuilder mb)
     {
         base.OnModelCreating(mb);
-
-        // mb.Entity<BaseEntity<TKey>>(b =>
-        // {
-        //     b.HasKey(i => i.Id);
-        //     b.Property(i => i.Id).HasDefaultValueSql("gen_random_uuid()").ValueGeneratedOnAdd();
-        //     b.Property(i => i.CreatedAt).HasDefaultValueSql("now()").ValueGeneratedOnAdd();
-        //     b.Property(i => i.UpdatedAt).HasDefaultValueSql("now()").ValueGeneratedOnAddOrUpdate();
-        // });
 
         mb.Entity<User<TKey>>(b =>
         {
@@ -86,8 +80,9 @@ public class IdentityContext<TKey>(DbContextOptions<IdentityContext<TKey>> optio
         });
         mb.Entity<Contact<TKey>>(b =>
         {
-            b.ToTable("contacts");
             ConfigureBase(b);
+            b.Ignore(c => c.Verified);
+            b.ToTable("contacts");
             b.Property(c => c.Type).IsRequired();
             b.HasOne(c => c.Owner)
                 .WithMany(u => u.Contacts)

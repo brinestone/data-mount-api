@@ -34,6 +34,7 @@ namespace DataMount.Infra.Migrations
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false, defaultValueSql: "gen_random_uuid()"),
+                    verified_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     type = table.Column<int>(type: "integer", nullable: false),
                     value = table.Column<string>(type: "text", nullable: true),
                     owner_id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -72,7 +73,7 @@ namespace DataMount.Infra.Migrations
                 {
                     table.PrimaryKey("pk_accounts", x => x.id);
                     table.ForeignKey(
-                        name: "fk_accounts_contact_guid_identifier_contact_id",
+                        name: "fk_accounts_contacts_identifier_contact_id",
                         column: x => x.identifier_contact_id,
                         principalTable: "contacts",
                         principalColumn: "id",
