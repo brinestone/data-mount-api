@@ -4,9 +4,9 @@ using DataMount.Domain.Models.Identity;
 
 namespace DataMount.App.AutoMapper;
 
-public class AutoMapperProfile<TKey> : Profile where TKey : struct, IEquatable<TKey>
+public class AppMapperProfile<TKey> : Profile where TKey : struct, IEquatable<TKey>
 {
-    public AutoMapperProfile()
+    public AppMapperProfile()
     {
         CreateMap<CreateUserWithCredentialInput, User<TKey>>();
     }

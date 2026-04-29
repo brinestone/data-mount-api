@@ -3,6 +3,7 @@ using System;
 using DataMount.Infra.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DataMount.Infra.Migrations
 {
     [DbContext(typeof(IdentityContext<Guid>))]
-    partial class IdentityContextModelSnapshot : ModelSnapshot
+    [Migration("20260429121333_RenameLogoToPhoto")]
+    partial class RenameLogoToPhoto
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -137,7 +140,7 @@ namespace DataMount.Infra.Migrations
                         .HasColumnName("id")
                         .HasDefaultValueSql("gen_random_uuid()");
 
-                    b.Property<Guid?>("AccountId")
+                    b.Property<Guid>("AccountId")
                         .HasColumnType("uuid")
                         .HasColumnName("account_id");
 
@@ -201,6 +204,7 @@ namespace DataMount.Infra.Migrations
                         .HasDefaultValueSql("now()");
 
                     b.Property<string>("Ip")
+                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("ip");
 
@@ -348,6 +352,7 @@ namespace DataMount.Infra.Migrations
                         .WithMany()
                         .HasForeignKey("AccountId")
                         .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
                         .HasConstraintName("fk_login_attempts_account_guid_account_id");
 
                     b.Navigation("Account");

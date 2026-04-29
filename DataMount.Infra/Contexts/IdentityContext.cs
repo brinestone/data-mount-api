@@ -1,9 +1,7 @@
 using DataMount.Domain.Models;
 using DataMount.Domain.Models.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Microsoft.EntityFrameworkCore.ValueGeneration;
 
 namespace DataMount.Infra.Contexts;
 
@@ -13,6 +11,8 @@ public class IdentityContext<TKey>(DbContextOptions<IdentityContext<TKey>> optio
     public virtual DbSet<User<TKey>> Users { get; set; }
     public virtual DbSet<Contact<TKey>> Contacts { get; set; }
     public virtual DbSet<CredentialAccount<TKey>> CredentialAccounts { get; set; }
+    public virtual DbSet<LoginAttempt<TKey>> LoginAttempts { get; set; }
+    public virtual DbSet<Session<TKey>> Sessions { get; set; }
 
     private static void ConfigureBase<T>(EntityTypeBuilder<T> builder) where T : BaseEntity<TKey>
     {
@@ -57,7 +57,7 @@ public class IdentityContext<TKey>(DbContextOptions<IdentityContext<TKey>> optio
                 .HasForeignKey(a => a.OwnerId)
                 .IsRequired()
                 .OnDelete(DeleteBehavior.Cascade);
-            b.HasIndex(a => new { a.IdentifierContactId, a.OwnerId }).IsUnique();
+            b.HasAlternateKey(a => new { a.IdentifierContactId, a.OwnerId });
             b.HasOne(a => a.IdentifierContact)
                 .WithMany()
                 .HasForeignKey(a => a.IdentifierContactId)
@@ -84,6 +84,8 @@ public class IdentityContext<TKey>(DbContextOptions<IdentityContext<TKey>> optio
             b.Ignore(c => c.Verified);
             b.ToTable("contacts");
             b.Property(c => c.Type).IsRequired();
+            b.HasAlternateKey(c => new { c.Type, c.Value });
+            b.Property(c => c.Value).IsRequired();
             b.HasOne(c => c.Owner)
                 .WithMany(u => u.Contacts)
                 .HasForeignKey(c => c.OwnerId)
@@ -99,13 +101,13 @@ public class IdentityContext<TKey>(DbContextOptions<IdentityContext<TKey>> optio
                 .WithMany()
                 .HasForeignKey(l => l.AccountId)
                 .OnDelete(DeleteBehavior.Cascade)
-                .IsRequired();
+                .IsRequired(false);
         });
         mb.Entity<Session<TKey>>(b =>
         {
             b.ToTable("sessions");
             ConfigureBase(b);
-            b.Property(s => s.Ip).IsRequired();
+            b.Property(s => s.Ip).IsRequired(false);
             b.HasOne(s => s.Attempt)
                 .WithOne()
                 .HasForeignKey<Session<TKey>>(s => s.AttemptId)

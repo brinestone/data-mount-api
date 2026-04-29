@@ -4,7 +4,7 @@ public class User<TKey> : BaseEntity<TKey> where TKey : struct, IEquatable<TKey>
 {
     public string? FirstName { get; set; }
     public string LastName { get; set; } = string.Empty;
-    public string? Logo { get; set; }
+    public string? Photo { get; set; }
     public DateTime? BannedAt { get; set; }
     public string? BanReason { get; set; }
 

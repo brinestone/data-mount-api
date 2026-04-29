@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace DataMount.Api.Dto;
+namespace DataMount.Api.Payloads;
 
 public class EmailSignUpRequest
 {
