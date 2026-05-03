@@ -1,0 +1,4 @@
+﻿name: Trigger Deployment
+
+on:
+  deployment: 
