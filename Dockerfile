@@ -12,7 +12,7 @@ WORKDIR /src
 COPY ["DataMount.Api/DataMount.Api.csproj", "DataMount.Api/"]
 COPY . .
 RUN dotnet restore "DataMount.Api/DataMount.Api.csproj"
-RUN dotnet ef migrations bundle --self-contained -r linux-x64 --project DataMount.Infra --startup-project DataMount.Api
+RUN /root/.dotnet/tools/dotnet-ef migrations bundle --self-contained -r linux-x64 --project DataMount.Infra --startup-project DataMount.Api
 WORKDIR "/src/DataMount.Api"
 RUN dotnet build "./DataMount.Api.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
