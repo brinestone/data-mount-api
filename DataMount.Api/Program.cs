@@ -3,8 +3,9 @@ using DataMount.Api.AutoMapper;
 using DataMount.App.AutoMapper;
 using DataMount.App.Extensions;
 using DataMount.Infra.Contexts;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
 using Scalar.AspNetCore;
@@ -14,10 +15,10 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddEnvironmentVariables();
 var config = builder.Configuration;
 
-
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
+        options.AllowInputFormatterExceptionMessages = true;
         options.JsonSerializerOptions.WriteIndented = true;
         options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
     });
@@ -26,7 +27,7 @@ builder.Services.AddCors();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddHttpLogging();
 builder.Services.AddLogging();
-builder.Services.AddDbContext<IdentityContext<Guid>>(options =>
+builder.Services.AddDbContext<AuthContext<Guid>>(options =>
 {
     options.UseNpgsql(config.GetConnectionString("DefaultConnection"));
     options.UseSnakeCaseNamingConvention();
@@ -39,8 +40,9 @@ builder.Services.AddAutoMapper(c =>
 });
 builder.Services.AddAuthentication(options =>
 {
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+    options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
 }).AddCookie(options =>
 {
     options.Cookie.Name = Constants.AuthCookieName;
@@ -49,13 +51,19 @@ builder.Services.AddAuthentication(options =>
     options.LogoutPath = "/api/identity/logout";
     options.Cookie.Path = "/api";
     options.Cookie.HttpOnly = true;
-    options.Cookie.SameSite = SameSiteMode.Strict;
+    options.Cookie.SameSite = SameSiteMode.Lax;
+    if (config["ASPNETCORE_ENVIRONMENT"] != "Development")
+    {
+        options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+    }
+
     options.Events.OnRedirectToLogin = context =>
     {
         context.Response.StatusCode = StatusCodes.Status401Unauthorized;
         return Task.CompletedTask;
     };
 });
+builder.Services.AddAntiforgery(options => { options.HeaderName = Constants.AntiForgeryHeaderName; });
 builder.Services.AddAuthorization();
 builder.Services.AddApplicationServices<Guid>();
 
@@ -94,10 +102,14 @@ if (app.Environment.IsDevelopment())
     });
 }
 
+app.UseForwardedHeaders(); // Move to the very top to fix IPs/Protocols early
 app.UseCors();
-app.UseForwardedHeaders();
-app.UseAuthentication();
-app.UseAuthorization();
+app.UseRouting();
+
+app.UseAuthentication(); // Identify the user
+app.UseAuthorization(); // Check permissions
+app.UseAntiforgery(); // Validate CSRF based on identified user
+
 app.MapControllers();
 
 app.Run();

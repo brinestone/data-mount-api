@@ -1,6 +1,0 @@
-@DataMount.Api_HostAddress = http://localhost:5144
-
-GET {{DataMount.Api_HostAddress}}/api
-Accept: application/json
-
-###

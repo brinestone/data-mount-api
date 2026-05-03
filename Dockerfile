@@ -8,8 +8,8 @@ FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["DataMount.Api/DataMount.Api.csproj", "DataMount.Api/"]
-RUN dotnet restore "DataMount.Api/DataMount.Api.csproj"
 COPY . .
+RUN dotnet restore "DataMount.Api/DataMount.Api.csproj"
 WORKDIR "/src/DataMount.Api"
 RUN dotnet build "./DataMount.Api.csproj" -c $BUILD_CONFIGURATION -o /app/build
 

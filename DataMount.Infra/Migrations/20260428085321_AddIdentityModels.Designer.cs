@@ -11,7 +11,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace DataMount.Infra.Migrations
 {
-    [DbContext(typeof(IdentityContext<Guid>))]
+    [DbContext(typeof(AuthContext<Guid>))]
     [Migration("20260428085321_AddIdentityModels")]
     partial class AddIdentityModels
     {

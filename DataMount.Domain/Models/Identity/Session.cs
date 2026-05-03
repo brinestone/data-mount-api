@@ -3,7 +3,7 @@
 public class Session<TKey> : BaseEntity<TKey> where TKey : struct, IEquatable<TKey>
 {
     public string? UserAgent { get; set; }
-    public string Ip { get; set; } = string.Empty;
+    public string? Ip { get; set; }
     public TKey? AccountId { get; set; }
     public TKey AttemptId { get; set; }
 

@@ -3,7 +3,7 @@ using DataMount.Domain.Models.Identity;
 
 namespace DataMount.App.Services.Contracts;
 
-public interface IIdentityService<TKey> where TKey : struct, IEquatable<TKey>
+public interface IAuthService<TKey> where TKey : struct, IEquatable<TKey>
 {
     Task<Session<TKey>> CreateUserCredentialSessionAsync(CreateCredentialSessionInput input,
         CancellationToken cancellationToken = default);

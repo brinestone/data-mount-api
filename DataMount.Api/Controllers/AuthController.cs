@@ -1,35 +1,35 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
-using System.Net;
 using System.Security.Claims;
 using System.Text;
 using AutoMapper;
+using BenScr.RandomNameGenerator;
 using DataMount.Api.Options;
 using DataMount.Api.Payloads;
 using DataMount.App.Inputs;
 using DataMount.App.Services.Contracts;
+using DataMount.Domain.Exceptions;
 using DataMount.Domain.Models.Identity;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
 namespace DataMount.Api.Controllers;
 
 [ApiController]
-[Route("api/identity")]
-[Tags("Identity")]
-public class IdentityController(ILogger<IdentityController> logger) : ControllerBase
+[Route("api/auth")]
+[Tags("Auth")]
+public class AuthController(ILogger<AuthController> logger) : ControllerBase
 {
     [HttpPost("sign-in/email")]
     [EndpointSummary("Email sign in")]
+    [EndpointName("emailSignIn")]
     [ProducesResponseType(typeof(SessionDto<Guid>), StatusCodes.Status202Accepted, "application/json")]
     [EndpointDescription("Sign in a user using their email credentials")]
     public async Task<IActionResult> EmailSignIn(
         [FromBody] EmailSignInRequest dto,
-        [FromServices] IIdentityService<Guid> @is,
+        [FromServices] IAuthService<Guid> @is,
         [FromServices] IMapper mapper,
         [FromServices] IOptions<CookieAuthOptions> jwtOptions,
         [FromServices] IWebHostEnvironment env)
@@ -50,12 +50,13 @@ public class IdentityController(ILogger<IdentityController> logger) : Controller
             new(Constants.PermissionsId, session.Account.OwnerId.ToString()!)
         };
         var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-        await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identity), new AuthenticationProperties
-        {
-            IsPersistent = dto.StaySignedIn,
-            ExpiresUtc = expiration
-        });
-        
+        await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identity),
+            new AuthenticationProperties
+            {
+                IsPersistent = dto.StaySignedIn,
+                ExpiresUtc = expiration
+            });
+
         return Accepted(result);
     }
 
@@ -82,16 +83,19 @@ public class IdentityController(ILogger<IdentityController> logger) : Controller
 
     [HttpPost("sign-up/email")]
     [EndpointSummary("Email sign up")]
+    [EndpointName("emailSignUp")]
     [EndpointDescription("Create a new user account using email")]
+    [ProducesResponseType(StatusCodes.Status409Conflict, Description = "The identifier is already in use")]
     public async Task<IActionResult> EmailSignUp([FromBody] EmailSignUpRequest dto,
-        [FromServices] IIdentityService<Guid> identityService)
+        [FromServices] IAuthService<Guid> authService)
     {
-        var user = await identityService.CreateUserFromCredentialAsync(new CreateUserWithCredentialInput
+        var gen = new NameGenerator();
+        var user = await authService.CreateUserFromCredentialAsync(new CreateUserWithCredentialInput
         (
             ContactType: ContactType.Email,
-            FirstName: dto.FirstName,
+            FirstName: gen.FirstName(),
             Identifier: dto.Email!,
-            LastName: dto.LastName,
+            LastName: gen.LastName(),
             Password: dto.Password
         ));
 

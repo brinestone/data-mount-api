@@ -9,25 +9,13 @@ using Microsoft.Extensions.Logging;
 
 namespace DataMount.App.Services.Implementations;
 
-public class IdentityService<TKey>(
-    ILogger<IdentityService<TKey>> logger,
-    IdentityContext<TKey> context,
+public class AuthService<TKey>(
+    ILogger<AuthService<TKey>> logger,
+    AuthContext<TKey> context,
     IPasswordEncoder passwordEncoder,
-    IMapper mapper) : IIdentityService<TKey>
+    IMapper mapper) : IAuthService<TKey>
     where TKey : struct, IEquatable<TKey>
 {
-    // public async Task<CredentialAccount<TKey>?> FindCredentialAccountByIdentifierAsync(string identifier,
-    //     ContactType contactType, CancellationToken cancellation = default)
-    // {
-    //     logger.LogDebug("finding account with credential identifier: {id}", identifier);
-    //
-    //     var result = await context.Contacts
-    //         .Join(context.CredentialAccounts, c => c.Id, ca => ca.IdentifierContactId,
-    //             (contact, account) => new { contact, account })
-    //         .FirstOrDefaultAsync(@params => @params.contact.Value == identifier && @params.contact.Type == contactType, cancellation);
-    //     return result?.account;
-    // }
-
     public async Task<Session<TKey>> CreateUserCredentialSessionAsync(CreateCredentialSessionInput input,
         CancellationToken cancellationToken = default)
     {
@@ -85,6 +73,10 @@ public class IdentityService<TKey>(
     public async Task<User<TKey>> CreateUserFromCredentialAsync(CreateUserWithCredentialInput input,
         CancellationToken token = default)
     {
+        var accountExists = await context.Contacts
+            .AnyAsync(contact => contact.Type == input.ContactType && contact.Value == input.Identifier, token);
+        if (accountExists)
+            throw new ConflictException($"The identifier: \"{input.Identifier}\" is already in use");
         logger.LogInformation("creating new user using credentials. type: {0}, identifier: {1}", input.ContactType,
             input.Identifier);
 

@@ -11,6 +11,6 @@ public static class ServiceExtensions
         where TKey : struct, IEquatable<TKey>
     {
         collection.AddSingleton<IPasswordEncoder, Argon2PasswordEncoder>();
-        collection.AddScoped<IIdentityService<TKey>, IdentityService<TKey>>();
+        collection.AddScoped<IAuthService<TKey>, AuthService<TKey>>();
     }
 }

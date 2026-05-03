@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace DataMount.Infra.Contexts;
 
-public class IdentityContext<TKey>(DbContextOptions<IdentityContext<TKey>> options)
+public class AuthContext<TKey>(DbContextOptions<AuthContext<TKey>> options)
     : DbContext(options) where TKey : struct, IEquatable<TKey>
 {
     public virtual DbSet<User<TKey>> Users { get; set; }
@@ -32,6 +32,7 @@ public class IdentityContext<TKey>(DbContextOptions<IdentityContext<TKey>> optio
             ConfigureBase(b);
             b.Property(u => u.FirstName);
             b.Property(u => u.LastName).IsRequired();
+            b.Ignore(u => u.IsOnboarded);
             b.HasMany(u => u.Contacts)
                 .WithOne(c => c.Owner)
                 .HasForeignKey(c => c.OwnerId)

@@ -6,6 +6,8 @@ public class User<TKey> : BaseEntity<TKey> where TKey : struct, IEquatable<TKey>
     public string LastName { get; set; } = string.Empty;
     public string? Photo { get; set; }
     public DateTime? BannedAt { get; set; }
+    public DateTime? OnboardedAt { get; set; }
+    public bool IsOnboarded => OnboardedAt.HasValue;
     public string? BanReason { get; set; }
 
     public virtual IList<Contact<TKey>> Contacts { get; set; } = [];
