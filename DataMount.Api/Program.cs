@@ -35,7 +35,7 @@ builder.Services.AddApiVersioning(options =>
         options.GroupNameFormat = "'v'VVV";
         options.SubstituteApiVersionInUrl = true;
     });
-builder.Services.AddControllers()
+builder.Services.AddControllersWithViews()
     .AddJsonOptions(options =>
     {
         options.AllowInputFormatterExceptionMessages = true;
@@ -77,9 +77,9 @@ builder.Services.AddAuthentication(options =>
 {
     options.Cookie.Name = Constants.AuthCookieName;
     options.SlidingExpiration = true;
-    options.LoginPath = "/api/identity/sign-in";
-    options.LogoutPath = "/api/identity/logout";
-    options.Cookie.Path = "/api";
+    options.LoginPath = $"{Constants.ApiBasePath}/auth/sign-in";
+    options.LogoutPath = $"{Constants.ApiBasePath}/api/auth/logout";
+    options.Cookie.Path = Constants.ApiBasePath;
     options.Cookie.HttpOnly = true;
     options.Cookie.SameSite = SameSiteMode.Lax;
     if (config["ASPNETCORE_ENVIRONMENT"] != "Development")
@@ -93,7 +93,18 @@ builder.Services.AddAuthentication(options =>
         return Task.CompletedTask;
     };
 });
-builder.Services.AddAntiforgery(options => { options.HeaderName = Constants.AntiForgeryHeaderName; });
+builder.Services.AddAntiforgery(options =>
+{
+    options.Cookie.HttpOnly = true;
+    if (config["ASPNETCORE_ENVIRONMENT"] != "Development")
+    {
+        options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+    }
+
+    options.Cookie.SameSite = SameSiteMode.Lax;
+    options.Cookie.Path = Constants.ApiBasePath;
+    options.HeaderName = Constants.AntiForgeryHeaderName;
+});
 builder.Services.AddAuthorization();
 builder.Services.AddApplicationServices<Guid>();
 
