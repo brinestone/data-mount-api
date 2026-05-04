@@ -31,6 +31,7 @@ public class AuthContext<TKey>(DbContextOptions<AuthContext<TKey>> options)
             b.ToTable("users");
             ConfigureBase(b);
             b.Property(u => u.FirstName);
+            b.Ignore(u => u.IsBanned);
             b.Property(u => u.LastName).IsRequired();
             b.Ignore(u => u.IsOnboarded);
             b.HasMany(u => u.Contacts)

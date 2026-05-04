@@ -41,7 +41,16 @@ public class AuthService<TKey>(
         {
             var ex = new AccountNotFoundException();
             attempt.FailureReason = ex.Message;
-            attempt.FailedAt = DateTime.UtcNow;
+            attempt.FailedAt = DateTime.Now;
+            await context.SaveChangesAsync(cancellationToken);
+            throw ex;
+        }
+
+        if (result.Owner?.IsBanned ?? false)
+        {
+            var ex = new ForbiddenException(result.Owner.BanReason);
+            attempt.FailureReason = ex.Message;
+            attempt.FailedAt = DateTime.Now;
             await context.SaveChangesAsync(cancellationToken);
             throw ex;
         }
@@ -51,7 +60,7 @@ public class AuthService<TKey>(
         {
             var ex = new UnauthorizedException("Invalid identifier or password");
             attempt.FailureReason = ex.Message;
-            attempt.FailedAt = DateTime.UtcNow;
+            attempt.FailedAt = DateTime.Now;
             await context.SaveChangesAsync(cancellationToken);
             throw ex;
         }

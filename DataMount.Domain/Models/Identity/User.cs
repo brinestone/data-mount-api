@@ -7,6 +7,7 @@ public class User<TKey> : BaseEntity<TKey> where TKey : struct, IEquatable<TKey>
     public string? Photo { get; set; }
     public DateTime? BannedAt { get; set; }
     public DateTime? OnboardedAt { get; set; }
+    public bool IsBanned => BannedAt.HasValue;
     public bool IsOnboarded => OnboardedAt.HasValue;
     public string? BanReason { get; set; }
 
