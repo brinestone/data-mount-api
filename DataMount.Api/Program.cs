@@ -5,7 +5,6 @@ using DataMount.App.Extensions;
 using DataMount.Infra.Contexts;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.HttpOverrides;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
 using Scalar.AspNetCore;
@@ -15,7 +14,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddEnvironmentVariables();
 var config = builder.Configuration;
 
-builder.Services.AddControllers()
+builder.Services.AddControllersWithViews()
     .AddJsonOptions(options =>
     {
         options.AllowInputFormatterExceptionMessages = true;
@@ -57,9 +56,9 @@ builder.Services.AddAuthentication(options =>
 {
     options.Cookie.Name = Constants.AuthCookieName;
     options.SlidingExpiration = true;
-    options.LoginPath = "/api/identity/sign-in";
-    options.LogoutPath = "/api/identity/logout";
-    options.Cookie.Path = "/api";
+    options.LoginPath = $"{Constants.ApiBasePath}/auth/sign-in";
+    options.LogoutPath = $"{Constants.ApiBasePath}/api/auth/logout";
+    options.Cookie.Path = Constants.ApiBasePath;
     options.Cookie.HttpOnly = true;
     options.Cookie.SameSite = SameSiteMode.Lax;
     if (config["ASPNETCORE_ENVIRONMENT"] != "Development")
@@ -73,7 +72,18 @@ builder.Services.AddAuthentication(options =>
         return Task.CompletedTask;
     };
 });
-builder.Services.AddAntiforgery(options => { options.HeaderName = Constants.AntiForgeryHeaderName; });
+builder.Services.AddAntiforgery(options =>
+{
+    options.Cookie.HttpOnly = true;
+    if (config["ASPNETCORE_ENVIRONMENT"] != "Development")
+    {
+        options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+    }
+
+    options.Cookie.SameSite = SameSiteMode.Lax;
+    options.Cookie.Path = Constants.ApiBasePath;
+    options.HeaderName = Constants.AntiForgeryHeaderName;
+});
 builder.Services.AddAuthorization();
 builder.Services.AddApplicationServices<Guid>();
 
@@ -111,6 +121,7 @@ if (app.Environment.IsDevelopment())
         options.AddPreferredSecuritySchemes(Constants.AuthCookieName);
     });
 }
+
 app.MapGet("/api/health", () => new { ok = true })
     .WithTags("Health")
     .WithName("checkHealth")

@@ -1,6 +1,4 @@
-﻿using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
+﻿using System.Security.Claims;
 using AutoMapper;
 using BenScr.RandomNameGenerator;
 using DataMount.Api.Options;
@@ -9,19 +7,36 @@ using DataMount.App.Inputs;
 using DataMount.App.Services.Contracts;
 using DataMount.Domain.Exceptions;
 using DataMount.Domain.Models.Identity;
+using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
 
 namespace DataMount.Api.Controllers;
 
 [ApiController]
-[Route("api/auth")]
+[Route($"{Constants.ApiBasePath}/auth")]
 [Tags("Auth")]
 public class AuthController(ILogger<AuthController> logger) : ControllerBase
 {
+    [Authorize]
+    [HttpGet("aif-token")]
+    [EndpointSummary("Obtain antiforgery token")]
+    [EndpointName("getAntiforgeryToken")]
+    [EndpointDescription("Generate a new antiforegery token for the current session")]
+    public IActionResult GetAntiforgeryToken([FromServices] IAntiforgery antiforgery)
+    {
+        var tokens = antiforgery.GetAndStoreTokens(HttpContext);
+        // Send the token back in a cookie that JS can read
+        Response.Cookies.Append(Constants.AntiForgeryHeaderName, tokens.RequestToken!,
+            new CookieOptions { HttpOnly = false });
+
+        return Ok();
+    }
+
+    [AllowAnonymous]
     [HttpPost("sign-in/email")]
     [EndpointSummary("Email sign in")]
     [EndpointName("emailSignIn")]
@@ -60,27 +75,7 @@ public class AuthController(ILogger<AuthController> logger) : ControllerBase
         return Accepted(result);
     }
 
-    private static string GenerateJwt(Session<Guid> session, string secretKey, string issuer, DateTime expiration,
-        string? audience)
-    {
-        var secret = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
-        var credentials = new SigningCredentials(secret, SecurityAlgorithms.HmacSha256);
-        var claims = new[]
-        {
-            new Claim(ClaimTypes.NameIdentifier, session.Account?.OwnerId.ToString() ?? ""),
-        };
-
-        var token = new JwtSecurityToken(
-            issuer: issuer,
-            audience: audience,
-            claims: claims,
-            expires: expiration,
-            signingCredentials: credentials
-        );
-
-        return new JwtSecurityTokenHandler().WriteToken(token);
-    }
-
+    [AllowAnonymous]
     [HttpPost("sign-up/email")]
     [EndpointSummary("Email sign up")]
     [EndpointName("emailSignUp")]
