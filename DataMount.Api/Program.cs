@@ -23,7 +23,17 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
     });
 builder.Services.Configure<ForwardedHeadersOptions>(options => { options.ForwardedHeaders = ForwardedHeaders.All; });
-builder.Services.AddCors();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("PermitAllowedOrigins", policy =>
+    {
+        var origins = config.GetSection("AllowedOrigins").Get<string[]>();
+        policy.WithOrigins(origins ?? [])
+            .AllowAnyHeader()
+            .AllowCredentials()
+            .AllowAnyMethod();
+    });
+});
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddHttpLogging();
 builder.Services.AddLogging();
@@ -101,9 +111,14 @@ if (app.Environment.IsDevelopment())
         options.AddPreferredSecuritySchemes(Constants.AuthCookieName);
     });
 }
+app.MapGet("/api/health", () => new { ok = true })
+    .WithTags("Health")
+    .WithName("checkHealth")
+    .WithSummary("Check health")
+    .WithDescription("Health checking endpoint");
 
 app.UseForwardedHeaders(); // Move to the very top to fix IPs/Protocols early
-app.UseCors();
+app.UseCors("PermitAllowedOrigins");
 app.UseRouting();
 
 app.UseAuthentication(); // Identify the user
@@ -111,5 +126,6 @@ app.UseAuthorization(); // Check permissions
 app.UseAntiforgery(); // Validate CSRF based on identified user
 
 app.MapControllers();
+
 
 app.Run();

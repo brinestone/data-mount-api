@@ -76,7 +76,7 @@ public class AuthService<TKey>(
         var accountExists = await context.Contacts
             .AnyAsync(contact => contact.Type == input.ContactType && contact.Value == input.Identifier, token);
         if (accountExists)
-            throw new ConflictException($"The identifier: \"{input.Identifier}\" is already in use");
+            throw new ConflictException($"{input.Identifier} is already in use");
         logger.LogInformation("creating new user using credentials. type: {0}, identifier: {1}", input.ContactType,
             input.Identifier);
 

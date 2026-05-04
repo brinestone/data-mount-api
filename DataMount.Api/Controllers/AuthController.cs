@@ -89,18 +89,32 @@ public class AuthController(ILogger<AuthController> logger) : ControllerBase
     public async Task<IActionResult> EmailSignUp([FromBody] EmailSignUpRequest dto,
         [FromServices] IAuthService<Guid> authService)
     {
-        var gen = new NameGenerator();
-        var user = await authService.CreateUserFromCredentialAsync(new CreateUserWithCredentialInput
-        (
-            ContactType: ContactType.Email,
-            FirstName: gen.FirstName(),
-            Identifier: dto.Email!,
-            LastName: gen.LastName(),
-            Password: dto.Password
-        ));
+        try
+        {
+            var gen = new NameGenerator();
+            var user = await authService.CreateUserFromCredentialAsync(new CreateUserWithCredentialInput
+            (
+                ContactType: ContactType.Email,
+                FirstName: gen.FirstName(),
+                Identifier: dto.Email!,
+                LastName: gen.LastName(),
+                Password: dto.Password
+            ));
 
-        logger.LogInformation("New email user created: {0}", user.Id);
+            logger.LogInformation("New email user created: {0}", user.Id);
 
-        return Created();
+            return Created();
+        }
+        catch (ConflictException e)
+        {
+            return Conflict(new
+            {
+                message = e.Message
+            });
+        }
+        catch (Exception e)
+        {
+            throw new HttpRequestException(e.Message);
+        }
     }
 }
