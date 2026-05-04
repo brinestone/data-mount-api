@@ -41,7 +41,7 @@ public class AuthService<TKey>(
         {
             var ex = new AccountNotFoundException();
             attempt.FailureReason = ex.Message;
-            attempt.FailedAt = DateTime.Now;
+            attempt.FailedAt = DateTime.UtcNow;
             await context.SaveChangesAsync(cancellationToken);
             throw ex;
         }
@@ -50,7 +50,7 @@ public class AuthService<TKey>(
         {
             var ex = new ForbiddenException(result.Owner.BanReason);
             attempt.FailureReason = ex.Message;
-            attempt.FailedAt = DateTime.Now;
+            attempt.FailedAt = DateTime.UtcNow;
             await context.SaveChangesAsync(cancellationToken);
             throw ex;
         }
@@ -58,9 +58,10 @@ public class AuthService<TKey>(
         var isPasswordValid = passwordEncoder.Verify(input.Password, result.PasswordHash);
         if (!isPasswordValid)
         {
-            var ex = new UnauthorizedException("Invalid identifier or password");
+            var ex = new UnauthorizedException(
+                $"Invalid {input.ContactType.ToString().ToLowerInvariant()} or password");
             attempt.FailureReason = ex.Message;
-            attempt.FailedAt = DateTime.Now;
+            attempt.FailedAt = DateTime.UtcNow;
             await context.SaveChangesAsync(cancellationToken);
             throw ex;
         }
