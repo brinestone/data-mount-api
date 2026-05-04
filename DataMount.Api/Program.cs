@@ -7,7 +7,6 @@ using DataMount.App.Extensions;
 using DataMount.Infra.Contexts;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.HttpOverrides;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
 using Scalar.AspNetCore;
@@ -119,7 +118,6 @@ builder.Services.AddOpenApi(options =>
             Type = SecuritySchemeType.ApiKey,
             In = ParameterLocation.Cookie,
             Name = Constants.AuthCookieName, // Ensure this matches your actual cookie name
-            Description = "Log in via the /api/identity/login endpoint to set the cookie."
         });
         return Task.CompletedTask;
     });

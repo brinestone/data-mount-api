@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using DataMount.Api.Payloads;
 using DataMount.App.Inputs;
+using DataMount.Domain.Exceptions;
 using DataMount.Domain.Models.Identity;
 
 namespace DataMount.Api.AutoMapper;
@@ -14,5 +15,8 @@ public class PayloadMapperProfile<TKey> : Profile where TKey : struct, IEquatabl
         CreateMap<EmailSignInRequest, CreateCredentialSessionInput>()
             .ForMember(i => i.Identifier, cfg => cfg.MapFrom(src => src.Email))
             .ForMember(i => i.ContactType, c => c.MapFrom(_ => ContactType.Email));
+        CreateMap<BaseException, ErrorMessagePayload>()
+            .ForMember(i => i.Status, p => p.MapFrom(src => src.Code));
+        CreateMap<Exception, ErrorMessagePayload>();
     }
 }
