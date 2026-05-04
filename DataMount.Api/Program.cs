@@ -1,5 +1,7 @@
 using System.Text.Json;
+using Asp.Versioning;
 using DataMount.Api.AutoMapper;
+using DataMount.Api.Options;
 using DataMount.App.AutoMapper;
 using DataMount.App.Extensions;
 using DataMount.Infra.Contexts;
@@ -15,6 +17,24 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddEnvironmentVariables();
 var config = builder.Configuration;
 
+builder.Services.Configure<ApiVersioningOptions>(config.GetSection("Versioning"));
+builder.Services.AddApiVersioning(options =>
+    {
+        var opts = config.GetRequiredSection("Versioning").Get<VersioningOptions>()!;
+        options.AssumeDefaultVersionWhenUnspecified = true;
+        options.DefaultApiVersion = new ApiVersion(opts.Major, opts.Minor);
+        options.ReportApiVersions = true;
+        options.ApiVersionReader = ApiVersionReader.Combine(
+            new UrlSegmentApiVersionReader(),
+            new HeaderApiVersionReader("x-api-version"),
+            new QueryStringApiVersionReader("api-version")
+        );
+    }).AddMvc()
+    .AddApiExplorer(options =>
+    {
+        options.GroupNameFormat = "'v'VVV";
+        options.SubstituteApiVersionInUrl = true;
+    });
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
@@ -111,6 +131,7 @@ if (app.Environment.IsDevelopment())
         options.AddPreferredSecuritySchemes(Constants.AuthCookieName);
     });
 }
+
 app.MapGet("/api/health", () => new { ok = true })
     .WithTags("Health")
     .WithName("checkHealth")
