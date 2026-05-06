@@ -7,7 +7,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace DataMount.Api.Resources.Dto {
+namespace DataMount.Api.Resources {
     using System;
     
     
@@ -21,14 +21,14 @@ namespace DataMount.Api.Resources.Dto {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class CredentialSignUpRequest {
+    internal class AuthMessages_fr {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
         private static global::System.Globalization.CultureInfo resourceCulture;
         
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal CredentialSignUpRequest() {
+        internal AuthMessages_fr() {
         }
         
         /// <summary>
@@ -38,7 +38,7 @@ namespace DataMount.Api.Resources.Dto {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("DataMount.Api.Resources.Dto.CredentialSignUpRequest", typeof(CredentialSignUpRequest).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("DataMount.Api.Resources.AuthMessages.fr", typeof(AuthMessages_fr).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -56,6 +56,42 @@ namespace DataMount.Api.Resources.Dto {
             }
             set {
                 resourceCulture = value;
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Addresse e-mail est invalide.
+        /// </summary>
+        internal static string invalid_email {
+            get {
+                return ResourceManager.GetString("invalid_email", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Les mots de passe ne correspondent pas.
+        /// </summary>
+        internal static string password_mismatch {
+            get {
+                return ResourceManager.GetString("password_mismatch", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Ce champ est obligatoire.
+        /// </summary>
+        internal static string required_field {
+            get {
+                return ResourceManager.GetString("required_field", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Erreur serveur. Veuillez réessayer..
+        /// </summary>
+        internal static string server_error {
+            get {
+                return ResourceManager.GetString("server_error", resourceCulture);
             }
         }
     }

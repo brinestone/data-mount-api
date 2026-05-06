@@ -20,7 +20,8 @@ namespace DataMount.Api.Controllers;
 [ApiController]
 [Route($"{Constants.ApiBasePath}/auth")]
 [Tags("Auth")]
-public class AuthController(ILogger<AuthController> logger, IMapper mapper) : ControllerBase
+[ApiVersion("1.0")]
+public class AuthControllerV1(ILogger<AuthControllerV1> logger, IMapper mapper) : ControllerBase
 {
     [EndpointName("signOut")]
     [ValidateAntiForgeryToken]
@@ -34,7 +35,6 @@ public class AuthController(ILogger<AuthController> logger, IMapper mapper) : Co
     }
 
     [Authorize]
-    [ApiVersion("1.0")]
     [HttpGet("aif-token")]
     [EndpointSummary("Obtain antiforgery token")]
     [EndpointName("getAntiforgeryToken")]
@@ -55,7 +55,8 @@ public class AuthController(ILogger<AuthController> logger, IMapper mapper) : Co
     [EndpointSummary("Email sign in")]
     [EndpointName("emailSignIn")]
     [ProducesResponseType(typeof(SessionDto<Guid>), StatusCodes.Status202Accepted, "application/json")]
-    [ProducesResponseType(StatusCodes.Status403Forbidden, Description = "The user is banned")]
+    [ProducesResponseType(StatusCodes.Status403Forbidden, Description = "The user is banned",
+        Type = typeof(ErrorMessagePayload))]
     [EndpointDescription("Sign in a user using their email credentials")]
     public async Task<IActionResult> EmailSignIn(
         [FromBody] EmailSignInRequest dto,
@@ -87,13 +88,20 @@ public class AuthController(ILogger<AuthController> logger, IMapper mapper) : Co
                     IsPersistent = dto.StaySignedIn,
                     ExpiresUtc = expiration
                 });
-
+            Response.Cookies.Append(Constants.SessionIdCookie, result.Id.ToString(), new CookieOptions
+            {
+                HttpOnly = false,
+                Path = Constants.ApiBasePath,
+                SameSite = SameSiteMode.Lax,
+                Secure = env.IsProduction(),
+                Expires = expiration
+            });
             return Accepted(result);
         }
         catch (Exception e)
         {
             var payload = mapper.Map<ErrorMessagePayload>(e);
-            return StatusCode(payload.Status, payload);
+            return Problem(statusCode: payload.Status, detail: payload.Message);
         }
     }
 
@@ -102,7 +110,8 @@ public class AuthController(ILogger<AuthController> logger, IMapper mapper) : Co
     [EndpointSummary("Email sign up")]
     [EndpointName("emailSignUp")]
     [EndpointDescription("Create a new user account using email")]
-    [ProducesResponseType(StatusCodes.Status409Conflict, Description = "The identifier is already in use")]
+    [ProducesResponseType(StatusCodes.Status409Conflict, Description = "The identifier is already in use",
+        Type = typeof(ErrorMessagePayload))]
     public async Task<IActionResult> EmailSignUp([FromBody] EmailSignUpRequest dto,
         [FromServices] IAuthService<Guid> authService)
     {
@@ -125,7 +134,7 @@ public class AuthController(ILogger<AuthController> logger, IMapper mapper) : Co
         catch (Exception e)
         {
             var payload = mapper.Map<ErrorMessagePayload>(e);
-            return StatusCode(payload.Status, payload);
+            return Problem(statusCode: payload.Status, detail: payload.Message);
         }
     }
 }
