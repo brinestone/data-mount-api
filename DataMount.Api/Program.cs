@@ -1,13 +1,17 @@
+using System.Globalization;
 using System.Text.Json;
 using Asp.Versioning;
 using DataMount.Api.AutoMapper;
 using DataMount.Api.Options;
+using DataMount.Api.Resources;
 using DataMount.App.AutoMapper;
 using DataMount.App.Extensions;
 using DataMount.Infra.Contexts;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.OpenApi;
 using Scalar.AspNetCore;
 using Constants = DataMount.Api.Constants;
@@ -28,19 +32,22 @@ builder.Services.AddApiVersioning(options =>
             new HeaderApiVersionReader("x-api-version"),
             new QueryStringApiVersionReader("api-version")
         );
-    }).AddMvc()
+    })
+    .AddMvc()
     .AddApiExplorer(options =>
     {
         options.GroupNameFormat = "'v'VVV";
         options.SubstituteApiVersionInUrl = true;
     });
 builder.Services.AddControllersWithViews()
+    .AddDataAnnotationsLocalization()
     .AddJsonOptions(options =>
     {
         options.AllowInputFormatterExceptionMessages = true;
         options.JsonSerializerOptions.WriteIndented = true;
         options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
-    });
+    })
+    .AddViewLocalization();
 builder.Services.Configure<ForwardedHeadersOptions>(options => { options.ForwardedHeaders = ForwardedHeaders.All; });
 builder.Services.AddCors(options =>
 {
@@ -52,6 +59,22 @@ builder.Services.AddCors(options =>
             .AllowCredentials()
             .AllowAnyMethod();
     });
+});
+builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
+builder.Services.Configure<RequestLocalizationOptions>(options =>
+{
+    var supportedCultures = new List<CultureInfo>
+    {
+        new("en"),
+        new("fr"),
+        new("en-US"),
+        new("fr-FR"),
+        new("fr-CM")
+    };
+
+    options.DefaultRequestCulture = new RequestCulture(culture: "en-US", uiCulture: "en-US");
+    options.SupportedCultures = supportedCultures;
+    options.SupportedUICultures = supportedCultures;
 });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddHttpLogging();
@@ -139,14 +162,19 @@ if (app.Environment.IsDevelopment())
         options.WithDotNetFlag();
         options.AddPreferredSecuritySchemes(Constants.AuthCookieName);
     });
+    app.MapGet("/api/health", () => new { ok = true })
+        .WithTags("Health")
+        .WithName("checkHealth")
+        .WithSummary("Check health")
+        .WithDescription("Health checking endpoint");
+}
+else
+{
+    app.MapGet("/api/health", () => new { ok = true });
 }
 
-app.MapGet("/api/health", () => new { ok = true })
-    .WithTags("Health")
-    .WithName("checkHealth")
-    .WithSummary("Check health")
-    .WithDescription("Health checking endpoint");
-
+var localizationOptions = app.Services.GetRequiredService<IOptions<RequestLocalizationOptions>>().Value;
+app.UseRequestLocalization(localizationOptions);
 app.UseForwardedHeaders(); // Move to the very top to fix IPs/Protocols early
 app.UseCors("PermitAllowedOrigins");
 app.UseRouting();
