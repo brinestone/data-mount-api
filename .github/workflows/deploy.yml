@@ -14,4 +14,4 @@ jobs:
     name: Deploy on render
     steps:
       - name: Trigger deployment hook
-        run: curl -L ${{ secrets.RENDER_DEPLOY_HOOK }}
+        run: curl -L "${{ secrets.RENDER_DEPLOY_HOOK }}"
