@@ -16,5 +16,4 @@ jobs:
       DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
     steps:
       - name: Trigger deployment hook
-        run: |
-          curl -L {{ env.DEPLOY_HOOK }}
+        run: curl -L ${{ env.DEPLOY_HOOK }}
