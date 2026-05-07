@@ -2,6 +2,10 @@
 
 on:
   push:
+    paths:
+      - '**/*.csproj'
+      - '**/*.cs'
+      - Dockerfile
     tags:
       - v.x.x
     branches:
