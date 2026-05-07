@@ -61,9 +61,8 @@ public class AuthControllerV1(ILogger<AuthControllerV1> logger, IMapper mapper) 
     public async Task<IActionResult> EmailSignIn(
         [FromBody] EmailSignInRequest dto,
         [FromServices] IAuthService<Guid> @is,
-        [FromServices] IOptions<CookieAuthOptions> jwtOptions,
-        [FromServices] IWebHostEnvironment env)
-    {
+        [FromServices] IOptions<CookieAuthOptions> jwtOptions
+    ) {
         try
         {
             var input = mapper.Map<CreateCredentialSessionInput>(dto);
@@ -86,6 +85,7 @@ public class AuthControllerV1(ILogger<AuthControllerV1> logger, IMapper mapper) 
                 new AuthenticationProperties
                 {
                     IsPersistent = dto.StaySignedIn,
+                    AllowRefresh = dto.StaySignedIn,
                     ExpiresUtc = expiration
                 });
             Response.Cookies.Append(Constants.SessionIdCookie, result.Id.ToString(), new CookieOptions
@@ -93,7 +93,7 @@ public class AuthControllerV1(ILogger<AuthControllerV1> logger, IMapper mapper) 
                 HttpOnly = false,
                 Path = Constants.ApiBasePath,
                 SameSite = SameSiteMode.Lax,
-                Secure = env.IsProduction(),
+                Secure = Request.IsHttps,
                 Expires = expiration
             });
             return Accepted(result);
@@ -127,7 +127,7 @@ public class AuthControllerV1(ILogger<AuthControllerV1> logger, IMapper mapper) 
                 Password: dto.Password
             ));
 
-            logger.LogInformation("New email user created: {0}", user.Id);
+            logger.LogInformation("New email user created: {userId}", user.Id);
 
             return Created();
         }

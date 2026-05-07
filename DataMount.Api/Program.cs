@@ -3,7 +3,6 @@ using System.Text.Json;
 using Asp.Versioning;
 using DataMount.Api.AutoMapper;
 using DataMount.Api.Options;
-using DataMount.Api.Resources;
 using DataMount.App.AutoMapper;
 using DataMount.App.Extensions;
 using DataMount.Infra.Contexts;
@@ -68,6 +67,7 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
         new("en"),
         new("fr"),
         new("en-US"),
+        new("en-GB"),
         new("fr-FR"),
         new("fr-CM")
     };
@@ -100,7 +100,7 @@ builder.Services.AddAuthentication(options =>
     options.Cookie.Name = Constants.AuthCookieName;
     options.SlidingExpiration = true;
     options.LoginPath = $"{Constants.ApiBasePath}/auth/sign-in";
-    options.LogoutPath = $"{Constants.ApiBasePath}/api/auth/logout";
+    options.LogoutPath = $"{Constants.ApiBasePath}/auth/logout";
     options.Cookie.Path = Constants.ApiBasePath;
     options.Cookie.HttpOnly = true;
     options.Cookie.SameSite = SameSiteMode.Lax;
@@ -148,7 +148,7 @@ builder.Services.AddOpenApi(options =>
 var app = builder.Build();
 
 app.UseHttpLogging();
-if (app.Environment.IsDevelopment())
+if (!app.Environment.IsProduction())
 {
     app.MapOpenApi();
     app.MapScalarApiReference(options =>
