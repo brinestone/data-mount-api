@@ -12,8 +12,6 @@ jobs:
   deploy_render:
     runs-on: ubuntu-latest
     name: Deploy on render
-    env:
-      DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
     steps:
       - name: Trigger deployment hook
-        run: curl -L ${{ env.DEPLOY_HOOK }}
+        run: curl -L ${{ secrets.RENDER_DEPLOY_HOOK }}
