@@ -11,7 +11,7 @@ namespace DataMount.App.Services.Implementations;
 
 public class AuthService<TKey>(
     ILogger<AuthService<TKey>> logger,
-    AuthContext<TKey> context,
+    IdentityContext<TKey> context,
     IPasswordEncoder passwordEncoder,
     IMapper mapper) : IAuthService<TKey>
     where TKey : struct, IEquatable<TKey>

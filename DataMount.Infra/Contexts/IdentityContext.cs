@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace DataMount.Infra.Contexts;
 
-public class AuthContext<TKey>(DbContextOptions<AuthContext<TKey>> options)
+public class IdentityContext<TKey>(DbContextOptions<IdentityContext<TKey>> options)
     : DbContext(options) where TKey : struct, IEquatable<TKey>
 {
     public virtual DbSet<User<TKey>> Users { get; set; }

@@ -6,7 +6,6 @@ using DataMount.Api.Options;
 using DataMount.Api.Payloads;
 using DataMount.App.Inputs;
 using DataMount.App.Services.Contracts;
-using DataMount.Domain.Exceptions;
 using DataMount.Domain.Models.Identity;
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Authentication;
@@ -23,11 +22,10 @@ namespace DataMount.Api.Controllers;
 [ApiVersion("1.0")]
 public class AuthControllerV1(ILogger<AuthControllerV1> logger, IMapper mapper) : ControllerBase
 {
+    [Authorize]
     [EndpointName("signOut")]
-    [ValidateAntiForgeryToken]
     [EndpointSummary("Sign out")]
     [HttpPost("sign-out")]
-    [Authorize(CookieAuthenticationDefaults.AuthenticationScheme)]
     public async Task<IActionResult> SignOutAsync()
     {
         await HttpContext.SignOutAsync();

@@ -11,7 +11,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace DataMount.Infra.Migrations
 {
-    [DbContext(typeof(AuthContext<Guid>))]
+    [DbContext(typeof(IdentityContext<Guid>))]
     [Migration("20260429094331_MinorUpdates")]
     partial class MinorUpdates
     {

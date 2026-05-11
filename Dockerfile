@@ -24,4 +24,11 @@ FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
 COPY --from=build /src/efbundle .
-ENTRYPOINT ["dotnet", "DataMount.Api.dll"]
+COPY --from=build /entrypoint.sh .
+
+USER root
+RUN chmod +x /usr/local/bin/entrypoint.sh
+RUN chmod +x /efbundle
+
+USER $APP_UID
+ENTRYPOINT ["./entrypoint.sh"]

@@ -12,6 +12,8 @@ public class PayloadMapperProfile<TKey> : Profile where TKey : struct, IEquatabl
     {
         CreateMap<Session<TKey>, SessionDto<TKey>>();
         CreateMap<User<TKey>, UserDto<TKey>>();
+        CreateMap<Contact<TKey>, ContactDto<TKey>>()
+            .ForMember(d => d.Type, cfg => cfg.MapFrom(src => src.Type.ToString().ToLowerInvariant()));
         CreateMap<EmailSignInRequest, CreateCredentialSessionInput>()
             .ForMember(i => i.Identifier, cfg => cfg.MapFrom(src => src.Email))
             .ForMember(i => i.ContactType, c => c.MapFrom(_ => ContactType.Email));

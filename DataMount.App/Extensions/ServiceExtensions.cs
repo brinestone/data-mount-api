@@ -12,5 +12,6 @@ public static class ServiceExtensions
     {
         collection.AddSingleton<IPasswordEncoder, Argon2PasswordEncoder>();
         collection.AddScoped<IAuthService<TKey>, AuthService<TKey>>();
+        collection.AddScoped<IUserService<TKey>, UserServiceV1<TKey>>();
     }
 }

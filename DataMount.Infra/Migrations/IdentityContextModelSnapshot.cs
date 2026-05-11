@@ -10,7 +10,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace DataMount.Infra.Migrations
 {
-    [DbContext(typeof(AuthContext<Guid>))]
+    [DbContext(typeof(IdentityContext<Guid>))]
     partial class IdentityContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
