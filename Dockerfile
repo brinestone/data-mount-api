@@ -28,7 +28,7 @@ COPY --from=build /src/efbundle.dll .
 COPY --from=build /src/entrypoint.sh .
 
 USER root
-RUN chmod +x ./entrypoint.sh
+RUN sed -i 's/\r$//' ./entrypoint.sh && chmod +x ./entrypoint.sh
 RUN chmod +x ./efbundle.dll
 
 USER $APP_UID
