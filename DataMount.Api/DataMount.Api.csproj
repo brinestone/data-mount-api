@@ -51,6 +51,10 @@
         <Generator>ResXFileCodeGenerator</Generator>
         <LastGenOutput>Messages.Designer.cs</LastGenOutput>
       </EmbeddedResource>
+        <EmbeddedResource Update="Resources\Messages.fr.resx">
+            <Generator>ResXFileCodeGenerator</Generator>
+            <LastGenOutput>Messages.fr.Designer.cs</LastGenOutput>
+        </EmbeddedResource>
     </ItemGroup>
 
     <ItemGroup>
@@ -68,6 +72,11 @@
         <DesignTime>True</DesignTime>
         <AutoGen>True</AutoGen>
         <DependentUpon>Messages.resx</DependentUpon>
+      </Compile>
+        <Compile Update="Resources\Messages.fr.Designer.cs">
+            <DesignTime>True</DesignTime>
+            <AutoGen>True</AutoGen>
+            <DependentUpon>Messages.fr.resx</DependentUpon>
       </Compile>
     </ItemGroup>
 

@@ -6,6 +6,7 @@ using DataMount.Api.Options;
 using DataMount.Api.Payloads;
 using DataMount.App.Inputs;
 using DataMount.App.Services.Contracts;
+using DataMount.Domain.Exceptions;
 using DataMount.Domain.Models.Identity;
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Authentication;
@@ -29,7 +30,7 @@ public class AuthControllerV1(ILogger<AuthControllerV1> logger, IMapper mapper) 
     public async Task<IActionResult> SignOutAsync()
     {
         await HttpContext.SignOutAsync();
-        return Ok();
+        return NoContent();
     }
 
     [Authorize]
@@ -60,7 +61,8 @@ public class AuthControllerV1(ILogger<AuthControllerV1> logger, IMapper mapper) 
         [FromBody] EmailSignInRequest dto,
         [FromServices] IAuthService<Guid> @is,
         [FromServices] IOptions<CookieAuthOptions> jwtOptions
-    ) {
+    )
+    {
         try
         {
             var input = mapper.Map<CreateCredentialSessionInput>(dto);
@@ -89,14 +91,14 @@ public class AuthControllerV1(ILogger<AuthControllerV1> logger, IMapper mapper) 
             Response.Cookies.Append(Constants.SessionIdCookie, result.Id.ToString(), new CookieOptions
             {
                 HttpOnly = false,
-                Path = Constants.ApiBasePath,
+                Path = "/",
                 SameSite = SameSiteMode.Lax,
                 Secure = Request.IsHttps,
                 Expires = expiration
             });
             return Accepted(result);
         }
-        catch (Exception e)
+        catch (AppException e)
         {
             var payload = mapper.Map<ErrorMessagePayload>(e);
             return Problem(statusCode: payload.Status, detail: payload.Message);
@@ -129,7 +131,7 @@ public class AuthControllerV1(ILogger<AuthControllerV1> logger, IMapper mapper) 
 
             return Created();
         }
-        catch (Exception e)
+        catch (AppException e)
         {
             var payload = mapper.Map<ErrorMessagePayload>(e);
             return Problem(statusCode: payload.Status, detail: payload.Message);

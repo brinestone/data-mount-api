@@ -7,7 +7,7 @@ public abstract class Account<TKey> : BaseEntity<TKey> where TKey : struct, IEqu
     public string? BlockReason { get; set; }
     public bool IsBlocked => BlockedAt.HasValue;
     public TKey? IdentifierContactId { get; set; }
-    public Contact<TKey>? IdentifierContact { get; set; }
+    public virtual Contact<TKey>? IdentifierContact { get; set; }
 
     public virtual User<TKey>? Owner { get; set; }
 }

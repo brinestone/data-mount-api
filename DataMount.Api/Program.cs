@@ -2,7 +2,10 @@ using System.Globalization;
 using System.Text.Json;
 using Asp.Versioning;
 using DataMount.Api.AutoMapper;
+using DataMount.Api.Extensions;
+using DataMount.Api.Filters;
 using DataMount.Api.Options;
+using DataMount.Api.Payloads;
 using DataMount.App.AutoMapper;
 using DataMount.App.Extensions;
 using DataMount.Infra.Contexts;
@@ -38,7 +41,7 @@ builder.Services.AddApiVersioning(options =>
         options.GroupNameFormat = "'v'VVV";
         options.SubstituteApiVersionInUrl = true;
     });
-builder.Services.AddControllersWithViews()
+builder.Services.AddControllersWithViews(options => { options.Filters.AddService<AppExceptionFilter>(); })
     .AddDataAnnotationsLocalization()
     .AddJsonOptions(options =>
     {
@@ -60,6 +63,7 @@ builder.Services.AddCors(options =>
     });
 });
 builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
+builder.Services.AddFilters();
 builder.Services.Configure<RequestLocalizationOptions>(options =>
 {
     var supportedCultures = new List<CultureInfo>
@@ -162,7 +166,7 @@ if (!app.Environment.IsProduction())
         options.WithDotNetFlag();
         options.AddPreferredSecuritySchemes(Constants.AuthCookieName);
     });
-    app.MapGet("/api/health", () => new { ok = true })
+    app.MapGet("/api/health", () => new HealthResponseDto { Ok = true })
         .WithTags("Health")
         .WithName("checkHealth")
         .WithSummary("Check health")
@@ -170,7 +174,7 @@ if (!app.Environment.IsProduction())
 }
 else
 {
-    app.MapGet("/api/health", () => new { ok = true });
+    app.MapGet("/api/health", () => new HealthResponseDto { Ok = true });
 }
 
 var localizationOptions = app.Services.GetRequiredService<IOptions<RequestLocalizationOptions>>().Value;

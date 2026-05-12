@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace DataMount.Api.Payloads;
+﻿namespace DataMount.Api.Payloads;
 
 public class UserDto<TKey> : BaseEntityDto<TKey>
 {
@@ -12,4 +10,5 @@ public class UserDto<TKey> : BaseEntityDto<TKey>
     public IList<ContactDto<TKey>> Contacts { get; set; } = [];
     public string? LastName { get; set; }
     public string FullName => string.Join(' ', FirstName ?? string.Empty, LastName ?? string.Empty).Trim();
+    public string Initials => string.Join("", (FirstName ?? "User")[0], (LastName ?? " ")[0]).Trim().ToUpperInvariant();
 }

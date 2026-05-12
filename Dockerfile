@@ -27,8 +27,8 @@ COPY --from=build /src/efbundle .
 COPY --from=build /src/entrypoint.sh .
 
 USER root
-RUN chmod +x /usr/local/bin/entrypoint.sh
-RUN chmod +x /app/efbundle
+RUN chmod +x ./entrypoint.sh
+RUN chmod +x ./efbundle
 
 USER $APP_UID
 ENTRYPOINT ["./entrypoint.sh"]

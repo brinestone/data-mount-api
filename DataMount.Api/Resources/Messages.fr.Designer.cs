@@ -21,14 +21,14 @@ namespace DataMount.Api.Resources {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class Messages {
+    internal class Messages_fr {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
         private static global::System.Globalization.CultureInfo resourceCulture;
         
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal Messages() {
+        internal Messages_fr() {
         }
         
         /// <summary>
@@ -38,7 +38,7 @@ namespace DataMount.Api.Resources {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("DataMount.Api.Resources.Messages", typeof(Messages).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("DataMount.Api.Resources.Messages.fr", typeof(Messages_fr).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -60,7 +60,7 @@ namespace DataMount.Api.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to An unexpected error occurred. Please try again later.
+        ///   Looks up a localized string similar to Une erreur inattendue s&apos;est produite. Veuillez réessayer plus tard..
         /// </summary>
         internal static string unknown_error {
             get {

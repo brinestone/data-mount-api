@@ -2,12 +2,13 @@
 using AutoMapper;
 using DataMount.Api.Payloads;
 using DataMount.App.Services.Contracts;
+using DataMount.Domain.Exceptions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DataMount.Api.Controllers;
 
-[Tags("Users")]
+[Tags("User")]
 [ApiController]
 [ApiVersion("1.0")]
 [Route($"{Constants.ApiBasePath}/users")]
@@ -17,7 +18,7 @@ public class UserControllerV1 : ControllerBase
     [EndpointName("getMe")]
     [EndpointSummary("Get current user information")]
     [HttpGet("me")]
-    [ProducesDefaultResponseType(typeof(UserDto<Guid>), Description = "A user's information")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(UserDto<Guid>), Description = "A user's information")]
     public async Task<IActionResult> GetMe(
         [FromServices] IUserService<Guid> userService,
         [FromServices] IMapper mapper
@@ -30,7 +31,7 @@ public class UserControllerV1 : ControllerBase
             var userDto = mapper.Map<UserDto<Guid>>(user);
             return Ok(userDto);
         }
-        catch (Exception e)
+        catch (AppException e)
         {
             var payload = mapper.Map<ErrorMessagePayload>(e);
             return Problem(statusCode: payload.Status, detail: payload.Message);

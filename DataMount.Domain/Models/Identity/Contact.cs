@@ -14,5 +14,5 @@ public class Contact<TKey> : BaseEntity<TKey> where TKey : struct, IEquatable<TK
     public string? Value { get; set; }
     public TKey? OwnerId { get; set; }
 
-    public User<TKey>? Owner { get; set; }
+    public virtual User<TKey>? Owner { get; set; }
 }
