@@ -7,7 +7,7 @@ on:
       - '**/*.cs'
       - Dockerfile
     tags:
-      - v.x.x
+      - v.*.*
     branches:
       - master
   workflow_dispatch:
