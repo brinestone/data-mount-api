@@ -24,7 +24,7 @@ FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
 COPY --from=build /src/efbundle .
-COPY --from=build /entrypoint.sh .
+COPY --from=build /src/entrypoint.sh .
 
 USER root
 RUN chmod +x /usr/local/bin/entrypoint.sh
