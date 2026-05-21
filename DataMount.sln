@@ -1,4 +1,4 @@
-Microsoft Visual Studio Solution File, Format Version 12.00
+﻿Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.2.0
 MinimumVisualStudioVersion = 10.0.40219.1
@@ -9,6 +9,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataMount.Domain", "DataMount.Domain\DataMount.Domain.csproj", "{1DBFE5BD-1BFE-7D98-5DCE-E29AC599F689}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataMount.Infra", "DataMount.Infra\DataMount.Infra.csproj", "{60A0B3A5-0C3A-8E04-4CC7-4414DF239943}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataMount.Migrator", "DataMount.Migrator\DataMount.Migrator.csproj", "{4F4DC642-8AF9-40D3-ADE9-BF7F2D456943}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -32,6 +34,10 @@ Global
 		{60A0B3A5-0C3A-8E04-4CC7-4414DF239943}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{60A0B3A5-0C3A-8E04-4CC7-4414DF239943}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{60A0B3A5-0C3A-8E04-4CC7-4414DF239943}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4F4DC642-8AF9-40D3-ADE9-BF7F2D456943}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4F4DC642-8AF9-40D3-ADE9-BF7F2D456943}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4F4DC642-8AF9-40D3-ADE9-BF7F2D456943}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4F4DC642-8AF9-40D3-ADE9-BF7F2D456943}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

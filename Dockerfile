@@ -15,6 +15,7 @@ RUN dotnet restore "DataMount.Api/DataMount.Api.csproj"
 RUN /root/.dotnet/tools/dotnet-ef migrations bundle --project DataMount.Infra --startup-project DataMount.Api -o efbundle.dll
 WORKDIR "/src/DataMount.Api"
 RUN dotnet build "./DataMount.Api.csproj" -c $BUILD_CONFIGURATION -o /app/build
+RUN dotnet build "./DataMount.Migrator"
 
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
