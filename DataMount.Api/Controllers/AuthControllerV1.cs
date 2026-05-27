@@ -30,6 +30,7 @@ public class AuthControllerV1(ILogger<AuthControllerV1> logger, IMapper mapper) 
     public async Task<IActionResult> SignOutAsync()
     {
         await HttpContext.SignOutAsync();
+        Response.Cookies.Delete(Constants.SessionIdCookie);
         return NoContent();
     }
 

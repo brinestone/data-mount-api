@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DataMount.Infra.Migrations
 {
     [DbContext(typeof(AppDbContext<Guid>))]
-    [Migration("20260502013841_AddOnboardingProperty")]
-    partial class AddOnboardingProperty
+    [Migration("20260527120425_AddProjectModels")]
+    partial class AddProjectModels
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -281,6 +281,144 @@ namespace DataMount.Infra.Migrations
                     b.ToTable("users", (string)null);
                 });
 
+            modelBuilder.Entity("DataMount.Domain.Models.Projects.Form<System.Guid>", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<DateTime?>("ArchivedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("archived_at");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid?>("ProjectId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("project_id");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("title");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.HasKey("Id")
+                        .HasName("pk_forms");
+
+                    b.HasIndex("ProjectId")
+                        .HasDatabaseName("ix_forms_project_id");
+
+                    b.ToTable("forms", (string)null);
+                });
+
+            modelBuilder.Entity("DataMount.Domain.Models.Projects.FormItem<System.Guid>", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<Guid>("FormId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("form_id");
+
+                    b.Property<string>("Path")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("path");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<string>("item_type")
+                        .IsRequired()
+                        .HasMaxLength(21)
+                        .HasColumnType("character varying(21)")
+                        .HasColumnName("item_type");
+
+                    b.HasKey("Id")
+                        .HasName("pk_form_items");
+
+                    b.HasIndex("FormId", "Path")
+                        .IsUnique()
+                        .HasDatabaseName("ix_form_items_form_id_path");
+
+                    b.ToTable("form_items", (string)null);
+
+                    b.HasDiscriminator<string>("item_type").HasValue("FormItem<Guid>");
+
+                    b.UseTphMappingStrategy();
+                });
+
+            modelBuilder.Entity("DataMount.Domain.Models.Projects.Project<System.Guid>", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<DateTime?>("ArchivedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("archived_at");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text")
+                        .HasColumnName("description");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("name");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.HasKey("Id")
+                        .HasName("pk_projects");
+
+                    b.ToTable("projects", (string)null);
+                });
+
             modelBuilder.Entity("DataMount.Domain.Models.Identity.CredentialAccount<System.Guid>", b =>
                 {
                     b.HasBaseType("DataMount.Domain.Models.Identity.Account<System.Guid>");
@@ -314,6 +452,19 @@ namespace DataMount.Infra.Migrations
                     b.ToTable("accounts", (string)null);
 
                     b.HasDiscriminator().HasValue("oauth");
+                });
+
+            modelBuilder.Entity("DataMount.Domain.Models.Projects.TextQuestion<System.Guid>", b =>
+                {
+                    b.HasBaseType("DataMount.Domain.Models.Projects.FormItem<System.Guid>");
+
+                    b.Property<string>("Config")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("config");
+
+                    b.ToTable("form_items", (string)null);
+
+                    b.HasDiscriminator().HasValue("question");
                 });
 
             modelBuilder.Entity("DataMount.Domain.Models.Identity.Account<System.Guid>", b =>
@@ -380,11 +531,43 @@ namespace DataMount.Infra.Migrations
                     b.Navigation("Attempt");
                 });
 
+            modelBuilder.Entity("DataMount.Domain.Models.Projects.Form<System.Guid>", b =>
+                {
+                    b.HasOne("DataMount.Domain.Models.Projects.Project<System.Guid>", "Project")
+                        .WithMany("Forms")
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasConstraintName("fk_forms_projects_project_id");
+
+                    b.Navigation("Project");
+                });
+
+            modelBuilder.Entity("DataMount.Domain.Models.Projects.FormItem<System.Guid>", b =>
+                {
+                    b.HasOne("DataMount.Domain.Models.Projects.Form<System.Guid>", "Form")
+                        .WithMany("FormItems")
+                        .HasForeignKey("FormId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasConstraintName("fk_form_items_forms_form_id");
+
+                    b.Navigation("Form");
+                });
+
             modelBuilder.Entity("DataMount.Domain.Models.Identity.User<System.Guid>", b =>
                 {
                     b.Navigation("Accounts");
 
                     b.Navigation("Contacts");
+                });
+
+            modelBuilder.Entity("DataMount.Domain.Models.Projects.Form<System.Guid>", b =>
+                {
+                    b.Navigation("FormItems");
+                });
+
+            modelBuilder.Entity("DataMount.Domain.Models.Projects.Project<System.Guid>", b =>
+                {
+                    b.Navigation("Forms");
                 });
 #pragma warning restore 612, 618
         }

@@ -11,7 +11,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace DataMount.Infra.Migrations
 {
-    [DbContext(typeof(IdentityContext<Guid>))]
+    [DbContext(typeof(AppDbContext<Guid>))]
     [Migration("20260429124152_DropAccountNotNullOnLoginAttempt")]
     partial class DropAccountNotNullOnLoginAttempt
     {
