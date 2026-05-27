@@ -1,11 +1,13 @@
+using System.Text.Json;
 using DataMount.Domain.Models;
 using DataMount.Domain.Models.Identity;
+using DataMount.Domain.Models.Projects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace DataMount.Infra.Contexts;
 
-public class IdentityContext<TKey>(DbContextOptions<IdentityContext<TKey>> options)
+public class AppDbContext<TKey>(DbContextOptions<AppDbContext<TKey>> options)
     : DbContext(options) where TKey : struct, IEquatable<TKey>
 {
     public virtual DbSet<User<TKey>> Users { get; set; }
@@ -13,6 +15,10 @@ public class IdentityContext<TKey>(DbContextOptions<IdentityContext<TKey>> optio
     public virtual DbSet<CredentialAccount<TKey>> CredentialAccounts { get; set; }
     public virtual DbSet<LoginAttempt<TKey>> LoginAttempts { get; set; }
     public virtual DbSet<Session<TKey>> Sessions { get; set; }
+    public virtual DbSet<Project<TKey>> Projects { get; set; }
+    public virtual DbSet<Form<TKey>> Forms { get; set; }
+    public virtual DbSet<Organization<TKey>> Organizations { get; set; }
+    public virtual DbSet<OrganizationMembership<TKey>> OrganizationMemberships { get; set; }
 
     private static void ConfigureBase<T>(EntityTypeBuilder<T> builder) where T : BaseEntity<TKey>
     {
@@ -26,6 +32,104 @@ public class IdentityContext<TKey>(DbContextOptions<IdentityContext<TKey>> optio
     {
         base.OnModelCreating(mb);
 
+        mb.Entity<TextQuestion<TKey>>(b =>
+        {
+            b.Property(c => c.Config)
+                .HasConversion(
+                    v => JsonSerializer.Serialize(v),
+                    v => JsonSerializer.Deserialize<TextQuestionConfig<TKey>>(v)!
+                )
+                .HasColumnType("jsonb");
+        });
+
+        mb.Entity<FormItem<TKey>>(b =>
+        {
+            ConfigureBase(b);
+            b.ToTable("form_items");
+            b.Property(f => f.Path).IsRequired();
+            b.HasIndex(f => new { f.FormId, f.Path }).IsUnique();
+            b.HasOne(f => f.Form)
+                .WithMany(f => f.FormItems)
+                .HasForeignKey(f => f.FormId)
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Cascade);
+            b.HasDiscriminator<string>("item_type")
+                .HasValue<TextQuestion<TKey>>("question");
+        });
+
+        mb.Entity<Form<TKey>>(b =>
+        {
+            ConfigureBase(b);
+            b.ToTable("forms");
+            b.Property(f => f.Title).IsRequired();
+
+            b.HasOne(f => f.CreatedBy)
+                .WithMany()
+                .HasForeignKey(f => f.CreatedById);
+            b.HasOne(f => f.Organization)
+                .WithMany()
+                .HasForeignKey(f => f.OrganizationId)
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Cascade);
+            b.HasOne(f => f.Project)
+                .WithMany(p => p.Forms)
+                .HasForeignKey(f => f.ProjectId)
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Cascade);
+            b.HasMany(f => f.FormItems)
+                .WithOne(f => f.Form)
+                .HasForeignKey(f => f.FormId)
+                .IsRequired(false);
+        });
+
+        mb.Entity<Project<TKey>>(b =>
+        {
+            ConfigureBase(b);
+            b.ToTable("projects");
+            b.Property(p => p.Name).IsRequired();
+            b.HasOne(p => p.CreatedBy)
+                .WithMany()
+                .HasForeignKey(p => p.CreatedById)
+                .OnDelete(DeleteBehavior.SetNull);
+            b.HasOne(p => p.Organization)
+                .WithMany(o => o.Projects)
+                .IsRequired()
+                .HasForeignKey(p => p.OrganizationId);
+            b.HasMany(p => p.Forms)
+                .WithOne(f => f.Project)
+                .HasForeignKey(f => f.ProjectId)
+                .IsRequired(false);
+        });
+
+        #region Identity Models
+
+        mb.Entity<OrganizationMembership<TKey>>(b =>
+        {
+            b.ToTable("org_memberships");
+            ConfigureBase(b);
+            b.Property(o => o.PermissionString).IsRequired();
+            b.HasOne(o => o.User)
+                .WithMany()
+                .IsRequired()
+                .HasForeignKey(o => o.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+            b.HasOne(o => o.Organization)
+                .WithMany(o => o.Memberships)
+                .HasForeignKey(o => o.OrganizationId)
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Cascade);
+            b.HasIndex(o => new { o.UserId, o.OrganizationId }).IsUnique();
+        });
+        mb.Entity<Organization<TKey>>(b =>
+        {
+            b.ToTable("organizations");
+            ConfigureBase(b);
+            b.Property(o => o.Name).IsRequired();
+            b.HasMany(o => o.Memberships)
+                .WithOne(m => m.Organization)
+                .HasForeignKey(m => m.OrganizationId)
+                .IsRequired(false);
+        });
         mb.Entity<User<TKey>>(b =>
         {
             b.ToTable("users");
@@ -121,5 +225,7 @@ public class IdentityContext<TKey>(DbContextOptions<IdentityContext<TKey>> optio
                 .IsRequired()
                 .OnDelete(DeleteBehavior.Cascade);
         });
+
+        #endregion
     }
 }

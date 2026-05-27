@@ -11,4 +11,12 @@ namespace DataMount.Api.Controllers;
 [Route($"{Constants.ApiBasePath}/projects")]
 public class ProjectsControllerV1 : ControllerBase
 {
+    [HttpGet]
+    [EndpointName("findProjects")]
+    [EndpointSummary("Find Projects")]
+    [EndpointDescription("Gets the projects the current user can access")]
+    public async Task<IActionResult> FindProjectsAsync()
+    {
+        return Ok();
+    }
 }

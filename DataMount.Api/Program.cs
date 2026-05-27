@@ -83,7 +83,7 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddHttpLogging();
 builder.Services.AddLogging();
-builder.Services.AddDbContext<IdentityContext<Guid>>(options =>
+builder.Services.AddDbContext<AppDbContext<Guid>>(options =>
 {
     options.UseNpgsql(config.GetConnectionString("DefaultConnection"));
     options.UseSnakeCaseNamingConvention();
